@@ -1,15 +1,20 @@
 plan puppet_applier::remote_apply
 (
-  $nodes = 'petersouter.co.uk'
+  String                           $server,
+  String                           $modules_upload,
 )
 {
 
-  $remote_apply_run = run_task('puppet_applier::apply', $nodes, modulepath => "/var/tmp")
+
+  file_upload($modules_upload, "/tmp/puppet_applier_modules/", $server)
+
+  $remote_apply_run = run_task('puppet_applier::apply', $server, { modulepath => "/tmp/puppet_applier_modules/",
+    code => "notify { 'Hello World' : }"})
 
   if($remote_apply_run.ok) {
-    util::print("Successfull ${remote_apply_run}")
+    notice("Successful ${remote_apply_run}")
   } else {
-    util::print("Failed ${remote_apply_run}")
+    notice("Failed ${remote_apply_run}")
   }
 
 }
